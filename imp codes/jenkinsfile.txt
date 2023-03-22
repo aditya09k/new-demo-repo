@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+    environment {
+        registry = "305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins"
+    }
+
+    stages {
+        stage('Docker Install') {
+            steps {
+                sh ''' sudo apt update -y && sudo apt install docker.io  -y
+                 '''
+                
+            }      
+        }
+        
+        stage('Create Dockerfile') {
+            steps {
+                sh 'sudo echo "FROM ubuntu:latest" > Dockerfile'
+                sh 'sudo echo "RUN apt-get update && apt-get install openjdk-8-jdk -y && apt-get install maven -y && apt-get install git -y" >> Dockerfile'
+                sh 'sudo echo "RUN git clone https://github.com/atulyw/student-ui.git" >> Dockerfile'
+                sh 'sudo echo "RUN cd student-ui && mvn clean package" >> Dockerfile'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'sudo docker build -t my-ubuntu-image .'
+            }
+        }
+
+         stage('Pushing to ECR') {
+            steps {
+                sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 305560828661.dkr.ecr.us-east-1.amazonaws.com'
+                sh 'docker tag my-ubuntu-image:latest 305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins:latest'
+                sh 'docker push 305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins:latest'
+            }
+        }
+    }
+}
+// configure aws cli 
+// and rum this command in root user - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 305560828661.dkr.ecr.us-east-1.amazonaws.com
+// sudo service docker start
+// give permission sudo chmod 666 /var/run/docker.sock
