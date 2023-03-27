@@ -1,0 +1,89 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@aditya09k 
+aditya09k
+/
+new-demo-repo
+Public
+Cannot fork because you own this repository and are not a member of any organizations.
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+new-demo-repo/imp codes/jenkinsfile.txt
+@aditya09k
+aditya09k this my jenkinsfile for docker file create and push to ecr
+Latest commit d6f933f 5 days ago
+ History
+ 1 contributor
+43 lines (38 sloc)  1.69 KB
+
+pipeline {
+    agent any
+    environment {
+        registry = "305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins"
+    }
+
+    stages {
+        stage('Docker Install') {
+            steps {
+                sh ''' sudo apt update -y && sudo apt install docker.io  -y
+                 '''
+                
+            }      
+        }
+        
+        stage('Create Dockerfile') {
+            steps {
+                sh 'sudo echo "FROM ubuntu:latest" > Dockerfile'
+                sh 'sudo echo "RUN apt-get update && apt-get install openjdk-8-jdk -y && apt-get install maven -y && apt-get install git -y" >> Dockerfile'
+                sh 'sudo echo "RUN git clone https://github.com/atulyw/student-ui.git" >> Dockerfile'
+                sh 'sudo echo "RUN cd student-ui && mvn clean package" >> Dockerfile'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'sudo docker build -t my-ubuntu-image .'
+            }
+        }
+
+         stage('Pushing to ECR') {
+            steps {
+                sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 305560828661.dkr.ecr.us-east-1.amazonaws.com'
+                sh 'docker tag my-ubuntu-image:latest 305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins:latest'
+                sh 'docker push 305560828661.dkr.ecr.us-east-1.amazonaws.com/test-jenkins:latest'
+            }
+        }
+    }
+}
+// configure aws cli 
+// and rum this command in root user - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 305560828661.dkr.ecr.us-east-1.amazonaws.com
+// sudo service docker start
+// give permission sudo chmod 666 /var/run/docker.sock
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+new-demo-repo/jenkinsfile.txt at master · aditya09k/new-demo-repo
