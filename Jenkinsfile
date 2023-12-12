@@ -11,7 +11,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-                echo 'Running pytest..'
+                echo 'Running testing on sonarscane'
             }
         }
         stage('Build') {
