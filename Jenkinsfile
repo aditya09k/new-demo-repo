@@ -29,7 +29,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo 'Cleaning..'
-                echo 'Running docker rmi..'
+                echo 'Running docker image'
             }
         }
     }
